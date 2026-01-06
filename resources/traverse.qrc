@@ -1,0 +1,25 @@
+<RCC>
+    <qresource prefix="/">
+        <file>images/traverse.png</file>
+        <file>content/about.html</file>
+        <file>images/qt_logo_32.png</file>
+        <file>styles/dark.qss</file>
+        <file>styles/light.qss</file>
+        <file>images/ui_pref_icon.svg</file>
+        <file>images/pref_toolbar_icon.svg</file>
+        <file>images/dark_dock_close_icon.png</file>
+        <file>images/dark_dock_max_icon.png</file>
+        <file>images/dark_down_arrow.png</file>
+        <file>images/dark_left_arrow.png</file>
+        <file>images/dark_right_arrow.png</file>
+        <file>images/dark_up_arrow.png</file>
+        <file>images/light_dock_close_icon.png</file>
+        <file>images/light_dock_max_icon.png</file>
+        <file>images/light_down_arrow.png</file>
+        <file>images/light_left_arrow.png</file>
+        <file>images/light_right_arrow.png</file>
+        <file>images/light_up_arrow.png</file>
+        <file>images/sizer_dark.png</file>
+        <file>images/sizer_light.png</file>
+    </qresource>
+</RCC>
