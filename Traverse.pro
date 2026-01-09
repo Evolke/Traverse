@@ -12,12 +12,16 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    src/flowlayout.cpp \
     src/ftpmdichild.cpp \
     src/aboutdialog.cpp \
     src/consoledock.cpp \
+    src/localfileview.cpp \
     src/main.cpp \
     src/mainwindow.cpp \
     src/prefsdialog.cpp \
+    src/remotefilemodel.cpp \
+    src/remotefileview.cpp \
     src/restmdichild.cpp \
     src/statusprogressbar.cpp \
     src/trv_storage.cpp \
@@ -25,11 +29,15 @@ SOURCES += \
     src/urlpixmap.cpp
 
 HEADERS += \
+    src/flowlayout.h \
     src/ftpmdichild.h \
     src/aboutdialog.h \
     src/consoledock.h \
+    src/localfileview.h \
     src/mainwindow.h \
     src/prefsdialog.h \
+    src/remotefilemodel.h \
+    src/remotefileview.h \
     src/restmdichild.h \
     src/statusprogressbar.h \
     src/trv_storage.h \

@@ -20,7 +20,7 @@ QMenu {
     color: #333333;
     padding: 0;
     border: 1px solid #ddd;
-
+    min-width: 120px;
 }
 
 QMenu:selected {
