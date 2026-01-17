@@ -26,6 +26,7 @@ SOURCES += \
     src/statusprogressbar.cpp \
     src/trv_storage.cpp \
     src/trvdialog.cpp \
+    src/trvscintillaedit.cpp \
     src/urlpixmap.cpp
 
 HEADERS += \
@@ -43,6 +44,7 @@ HEADERS += \
     src/trv_storage.h \
     src/trv_version.h \
     src/trvdialog.h \
+    src/trvscintillaedit.h \
     src/urlpixmap.h
 
 TRANSLATIONS += \
@@ -71,3 +73,16 @@ DEFINES += "VERSION_MAJOR=$$VERSION_MAJOR"\
 
 #Target version
 VERSION = $${VERSION_MAJOR}.$${VERSION_MINOR}.$${VERSION_BUILD}
+
+unix|win32: LIBS += -L$$PWD/scintilla/qt/ScintillaEdit/bin/ -lScintillaEdit5
+unix|win32: LIBS += -L$$PWD/lexilla/src/build/bin/ -lLexilla5
+
+INCLUDEPATH += $$PWD/scintilla/include
+INCLUDEPATH += $$PWD/scintilla/src
+INCLUDEPATH += $$PWD/scintilla/qt/ScintillaEdit
+INCLUDEPATH += $$PWD/scintilla/qt/ScintillaEditBase
+DEPENDPATH += $$PWD/scintilla/include
+
+
+INCLUDEPATH += $$PWD/''
+DEPENDPATH += $$PWD/''

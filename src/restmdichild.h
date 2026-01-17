@@ -11,6 +11,7 @@ class QLineEdit;
 class QTabWidget;
 class QNetworkAccessManager;
 class QRestAccessManager;
+class TrvScintillaEdit;
 QT_END_NAMESPACE
 
 class RequestHeader : public QWidget
@@ -88,7 +89,7 @@ private:
     QSplitter *m_pSubSplit;
     RequestHeader *m_pRequestHeader;
     RequestForm *m_pRequestForm;
-    QTextEdit *m_pResults;
+    TrvScintillaEdit *m_pResults;
     QRestAccessManager *m_pRestMan;
     QNetworkAccessManager *m_pNetMan;
 };

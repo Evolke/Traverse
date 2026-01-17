@@ -1,5 +1,6 @@
 #include "restmdichild.h"
 #include "mainwindow.h"
+#include "trvscintillaedit.h"
 
 #include <QSplitter>
 #include <QTextEdit>
@@ -12,7 +13,7 @@
 #include <QtNetwork/QRestAccessManager>
 #include <QtNetwork/QNetworkRequest>
 #include <QtNetwork/QRestReply>
-
+#include <ScintillaEdit.h>
 
 RestMdiChild::RestMdiChild(QWidget *parent)
     : QMdiSubWindow(parent)
@@ -27,8 +28,8 @@ RestMdiChild::RestMdiChild(QWidget *parent)
     m_pSplit->addWidget(m_pSubSplit);
     m_pRequestForm = new RequestForm(m_pSubSplit);
     m_pSubSplit->addWidget(m_pRequestForm);
-    m_pResults = new QTextEdit(m_pSubSplit);
-    m_pResults->setReadOnly(true);
+    m_pResults = new TrvScintillaEdit(m_pSubSplit);
+    m_pResults->set_doc(new ScintillaDocument);
     m_pSubSplit->addWidget(m_pResults);
     m_pNetMan = new QNetworkAccessManager(this);
     m_pRestMan = new QRestAccessManager(m_pNetMan);
@@ -48,7 +49,9 @@ void RestMdiChild::sendRequest()
             MainWindow *pMain = MainWindow::getInstance();
             if (reply.isSuccess()) {
                 QString results = reply.readText();
-                m_pResults->setText(results);
+                ScintillaDocument *doc = m_pResults->get_doc();
+                QByteArray sResponse = results.toUtf8();
+                doc->insert_string(0, sResponse);
             }
             pMain->toggleProgressBar();
         });
