@@ -1,5 +1,6 @@
 #include "restmdichild.h"
-#include "mainwindow.h"
+#include "../mainwindow.h"
+#include "responseview.h"
 
 #include <QSplitter>
 #include <QTextEdit>
@@ -9,31 +10,41 @@
 #include <QToolButton>
 #include <QLabel>
 #include <QMessageBox>
+#include <QJsonDocument>
 #include <QtNetwork/QRestAccessManager>
 #include <QtNetwork/QNetworkRequest>
 #include <QtNetwork/QRestReply>
+#include <QDateTime>
 
-
+/**
+ * @brief RestMdiChild::RestMdiChild
+ * @param parent
+ */
 RestMdiChild::RestMdiChild(QWidget *parent)
-    : QMdiSubWindow(parent)
+    : QFrame(parent)
 {
     m_pSplit = new QSplitter(Qt::Vertical, this);
     m_pSplit->setFrameStyle(QFrame::StyledPanel);
     m_pSplit->setHandleWidth(2);
-    setWidget(m_pSplit);
+    QVBoxLayout *layout = new QVBoxLayout(this);
+    layout->addWidget(m_pSplit);
     m_pRequestHeader = new RequestHeader(m_pSplit);
     m_pSplit->addWidget(m_pRequestHeader);
     m_pSubSplit = new QSplitter(Qt::Horizontal, m_pSplit);
     m_pSplit->addWidget(m_pSubSplit);
     m_pRequestForm = new RequestForm(m_pSubSplit);
     m_pSubSplit->addWidget(m_pRequestForm);
-    m_pResults = new QTextEdit(m_pSubSplit);
-    m_pResults->setReadOnly(true);
-    m_pSubSplit->addWidget(m_pResults);
+    m_pResponse = new ResponseView(m_pSubSplit);
+    m_pSubSplit->addWidget(m_pResponse);
     m_pNetMan = new QNetworkAccessManager(this);
     m_pRestMan = new QRestAccessManager(m_pNetMan);
+    layout->setContentsMargins(0,0,0,0);
+    setLayout(layout);
 }
 
+/**
+ * @brief RestMdiChild::sendRequest
+ */
 void RestMdiChild::sendRequest()
 {
     QString sUrl = m_pRequestHeader->getURL();
@@ -44,12 +55,21 @@ void RestMdiChild::sendRequest()
         QUrl url(sUrl);
         QNetworkRequest req(url);
         QByteArray data;
+        m_startTime = QDateTime::currentMSecsSinceEpoch();
+
         m_pRestMan->sendCustomRequest(req, method.toUtf8(),  data,  this, [this](QRestReply &reply) {
             MainWindow *pMain = MainWindow::getInstance();
-            if (reply.isSuccess()) {
-                QString results = reply.readText();
-                m_pResults->setText(results);
+            qint64 execTime = QDateTime::currentMSecsSinceEpoch() - m_startTime;
+            QByteArray data = reply.readBody();
+            QHttpHeaders headers = reply.networkReply()->headers();
+            if (data.length() > 0 || reply.hasError()) {
+                if (data.length() == 0) { data = reply.errorString().toUtf8(); }
+                m_pResponse->setDataWithHeaders(data, headers);
+                m_pResponse->setStatus(reply.httpStatus());
+                m_pResponse->setExecTime(execTime);
+                m_pResponse->setSize(data.length());
             }
+
             pMain->toggleProgressBar();
         });
 
@@ -60,6 +80,10 @@ void RestMdiChild::sendRequest()
     }
 }
 
+/**
+ * @brief RequestHeader::RequestHeader
+ * @param parent
+ */
 RequestHeader::RequestHeader(QWidget *parent)
     : QWidget(parent)
 {
@@ -75,6 +99,7 @@ RequestHeader::RequestHeader(QWidget *parent)
     m_pSendBtn->setText(tr("Send"));
     m_pSendBtn->setArrowType(Qt::RightArrow);
     m_pSendBtn->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+    m_pSendBtn->setMinimumHeight(26);
     RestMdiChild *pRestMain = dynamic_cast<RestMdiChild*>(parentWidget()->parentWidget());
     if (pRestMain) {
         connect(m_pSendBtn, &QToolButton::clicked, pRestMain, &RestMdiChild::sendRequest);
@@ -85,16 +110,28 @@ RequestHeader::RequestHeader(QWidget *parent)
     setLayout(layout);
 }
 
+/**
+ * @brief RequestHeader::getURL
+ * @return
+ */
 QString RequestHeader::getURL()
 {
     return m_pUrlEdit->text();
 }
 
+/**
+ * @brief RequestHeader::getMethod
+ * @return
+ */
 QString RequestHeader::getMethod()
 {
     return m_pMethodCB->currentText();
 }
 
+/**
+ * @brief ParamsTab::ParamsTab
+ * @param parent
+ */
 ParamsTab::ParamsTab(QWidget *parent)
     : QWidget(parent)
 {
@@ -103,6 +140,10 @@ ParamsTab::ParamsTab(QWidget *parent)
     setLayout(layout);
 }
 
+/**
+ * @brief AuthTab::AuthTab
+ * @param parent
+ */
 AuthTab::AuthTab(QWidget *parent)
     : QWidget(parent)
 {
@@ -111,6 +152,10 @@ AuthTab::AuthTab(QWidget *parent)
     setLayout(layout);
 }
 
+/**
+ * @brief HeadersTab::HeadersTab
+ * @param parent
+ */
 HeadersTab::HeadersTab(QWidget *parent)
     : QWidget(parent)
 {
@@ -119,6 +164,10 @@ HeadersTab::HeadersTab(QWidget *parent)
     setLayout(layout);
 }
 
+/**
+ * @brief BodyTab::BodyTab
+ * @param parent
+ */
 BodyTab::BodyTab(QWidget *parent)
     : QWidget(parent)
 {
@@ -127,6 +176,10 @@ BodyTab::BodyTab(QWidget *parent)
     setLayout(layout);
 }
 
+/**
+ * @brief RequestForm::RequestForm
+ * @param parent
+ */
 RequestForm::RequestForm(QWidget *parent)
     : QWidget(parent)
 {
@@ -137,5 +190,6 @@ RequestForm::RequestForm(QWidget *parent)
     m_pTabs->addTab(new HeadersTab(m_pTabs),tr("Headers"));
     m_pTabs->addTab(new BodyTab(m_pTabs),tr("Body"));
     layout->addWidget(m_pTabs);
+    layout->setContentsMargins(0,0,0,0);
     setLayout(layout);
 }

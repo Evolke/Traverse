@@ -1,11 +1,12 @@
 #include "ftpmdichild.h"
-#include "flowlayout.h"
+#include "../flowlayout.h"
 #include "localfileview.h"
 #include "remotefileview.h"
 
 #include <QSplitter>
 #include <QTreeWidget>
 #include <QTreeWidgetItem>
+#include <QVBoxLayout>
 #include <QGridLayout>
 #include <QLabel>
 #include <QLineEdit>
@@ -19,8 +20,12 @@
 #define SPACER_HEIGHT 10
 #define LABEL_HEIGHT 26
 
+/**
+ * @brief FtpMdiChild::FtpMdiChild
+ * @param parent
+ */
 FtpMdiChild::FtpMdiChild(QWidget *parent)
-    : QMdiSubWindow(parent)
+    : QFrame(parent)
 {
     m_pSplit = new QSplitter(Qt::Vertical, this);
     m_pConnectHeader = new ConnectHeader(m_pSplit);
@@ -30,16 +35,22 @@ FtpMdiChild::FtpMdiChild(QWidget *parent)
     m_pRemoteView = new RemoteFileView(m_pSubSplit);
     m_pSplit->setFrameStyle(QFrame::StyledPanel);
     m_pSplit->setHandleWidth(2);
-    setWidget(m_pSplit);
+    QVBoxLayout *layout = new QVBoxLayout(this);
+    layout->addWidget(m_pSplit);
     m_pSplit->addWidget(m_pSubSplit);
     m_pSubSplit->addWidget(m_pLocalView);
     m_pSubSplit->addWidget(m_pRemoteView);
     m_pSubSplit->setFrameStyle(QFrame::StyledPanel);
     m_pSubSplit->setHandleWidth(2);
-
+    layout->setContentsMargins(0,0,0,0);
+    setLayout(layout);
     //populateLocalTree(sPath);
 }
 
+/**
+ * @brief ConnectHeader::ConnectHeader
+ * @param parent
+ */
 ConnectHeader::ConnectHeader(QWidget *parent)
     : QWidget(parent)
 {

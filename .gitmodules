@@ -1,0 +1,3 @@
+[submodule "K-Editor"]
+	path = K-Editor
+	url = https://github.com/Evolke/K-Editor.git

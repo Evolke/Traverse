@@ -1,7 +1,7 @@
 #ifndef RESTMDICHILD_H
 #define RESTMDICHILD_H
 
-#include <QMdiSubWindow>
+#include <QFrame>
 
 QT_BEGIN_NAMESPACE
 class QSplitter;
@@ -11,6 +11,7 @@ class QLineEdit;
 class QTabWidget;
 class QNetworkAccessManager;
 class QRestAccessManager;
+class ResponseView;
 QT_END_NAMESPACE
 
 class RequestHeader : public QWidget
@@ -72,7 +73,7 @@ private:
     QTabWidget *m_pTabs;
 };
 
-class RestMdiChild : public QMdiSubWindow
+class RestMdiChild : public QFrame
 {
     Q_OBJECT
 public:
@@ -88,9 +89,10 @@ private:
     QSplitter *m_pSubSplit;
     RequestHeader *m_pRequestHeader;
     RequestForm *m_pRequestForm;
-    QTextEdit *m_pResults;
+    ResponseView *m_pResponse;
     QRestAccessManager *m_pRestMan;
     QNetworkAccessManager *m_pNetMan;
+    qint64 m_startTime;
 };
 
 #endif // RESTMDICHILD_H

@@ -3,12 +3,11 @@
 
 #include <QMainWindow>
 
-QT_BEGIN_NAMESPACE
 class QMdiArea;
+class QFrame;
 class StatusProgressBar;
 class QMdiSubWindow;
 class TRV_Storage;
-QT_END_NAMESPACE
 
 class MainWindow : public QMainWindow
 {
@@ -28,7 +27,7 @@ public:
 
     void logToConsole(QString &log);
     void toggleProgressBar();
-    QMdiSubWindow* currentMdiChild();
+    QFrame* currentMdiChild();
 
 public slots:
 
@@ -48,7 +47,7 @@ private:
     void createDocks();
     void readSettings();
     void writeSettings();
-    void openTab(QMdiSubWindow *pChild);
+    void openTab(QFrame *pChild);
 
     QToolBar *m_pToolBar;
     StatusProgressBar *m_pStatProg;
@@ -58,7 +57,7 @@ private:
     QString m_sTheme;
     QMap<QString, QAction*> m_actionMap;
     QMap<QString, QDockWidget*> m_docks;
-    QMdiSubWindow* m_pCurrentChild;
+    QFrame* m_pCurrentChild;
 
     static MainWindow *m_pSingleInst;
 
