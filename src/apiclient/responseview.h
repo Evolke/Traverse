@@ -31,7 +31,7 @@ class ResponseView : public QWidget
 public:
     explicit ResponseView(QWidget *parent = nullptr);
 
-    void setDataWithHeaders(QByteArray& data, QHttpHeaders &headers);
+    void setDataWithHeaders(QString &formattedText, QString &contentType);
     void setStatus(int status);
     void setExecTime(qint64 time);
     void setHeaders(QHttpHeaders &headers);

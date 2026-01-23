@@ -29,17 +29,19 @@ void TrvCodeEditor::loadDraculaStyle()
     setSyntaxStyle(style);
 }
 
-void TrvCodeEditor::setJson(QJsonDocument &jdoc)
+void TrvCodeEditor::setJson(QString &text)
 {
-    QString sText = jdoc.toJson();
-    setPlainText(sText);
+    setPlainText(text);
     setHighlighter(new QJSONHighlighter);
 }
 
-void TrvCodeEditor::setXml(QDomDocument &xdoc)
+void TrvCodeEditor::setXml(QString &text)
 {
-    QString sText = xdoc.toString();
-    setPlainText(sText);
+    setPlainText(text);
     setHighlighter(new QXMLHighlighter);
 }
 
+void TrvCodeEditor::setText(QString &text)
+{
+    setPlainText(text);
+}

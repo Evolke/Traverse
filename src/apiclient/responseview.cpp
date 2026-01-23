@@ -38,19 +38,15 @@ ResponseView::ResponseView(QWidget *parent)
 }
 
 
-void ResponseView::setDataWithHeaders(QByteArray& data, QHttpHeaders &headers)
+void ResponseView::setDataWithHeaders(QString &formattedText, QString &contentType)
 {
-    QByteArrayView contentType = headers.value(QHttpHeaders::WellKnownHeader::ContentType);
-    QString sContentType = contentType.toByteArray();
-    if (sContentType.contains(QRegularExpression("(application|text)\\/json"))) {
-        QJsonDocument jdoc = QJsonDocument::fromJson(data);
-        m_pEditor->setJson(jdoc);
-    } else if (sContentType.contains(QRegularExpression("application\\/(?:soap\\+)*xml"))) {
-        QDomDocument xdoc;
-        xdoc.setContent(data);
-        m_pEditor->setXml(xdoc);
+    if (contentType.contains(QRegularExpression("(application|text)\\/json"))) {
+        m_pEditor->setJson(formattedText);
+    } else if (contentType.contains(QRegularExpression("application\\/(?:soap\\+)*xml"))) {
+        m_pEditor->setXml(formattedText);
+    } else {
+        m_pEditor->setText(formattedText);
     }
-    setHeaders(headers);
 }
 
 /**

@@ -13,12 +13,16 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    src/apiclient/authtab.cpp \
     src/apiclient/responseview.cpp \
+    src/apiclient/requestoptions.cpp \
+    src/dropdowntabwidget.cpp \
     src/flowlayout.cpp \
     src/ftp/ftpmdichild.cpp \
     src/aboutdialog.cpp \
     src/consoledock.cpp \
     src/ftp/localfileview.cpp \
+    src/keyvaltableview.cpp \
     src/main.cpp \
     src/mainwindow.cpp \
     src/prefsdialog.cpp \
@@ -29,15 +33,20 @@ SOURCES += \
     src/trv_storage.cpp \
     src/trvcodeeditor.cpp \
     src/trvdialog.cpp \
+    src/trvthread.cpp \
     src/urlpixmap.cpp
 
 HEADERS += \
+    src/apiclient/authtab.h \
     src/apiclient/responseview.h \
+    src/apiclient/requestoptions.h \
+    src/dropdowntabwidget.h \
     src/flowlayout.h \
     src/ftp/ftpmdichild.h \
     src/aboutdialog.h \
     src/consoledock.h \
     src/ftp/localfileview.h \
+    src/keyvaltableview.h \
     src/mainwindow.h \
     src/prefsdialog.h \
     src/ftp/remotefilemodel.h \
@@ -48,6 +57,7 @@ HEADERS += \
     src/trv_version.h \
     src/trvcodeeditor.h \
     src/trvdialog.h \
+    src/trvthread.h \
     src/urlpixmap.h
 
 TRANSLATIONS += \

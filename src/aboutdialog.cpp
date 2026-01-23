@@ -25,13 +25,10 @@ AboutDialog::AboutDialog(QWidget *parent, Qt::WindowFlags f) : QDialog(parent, f
     m_pInfo->setReadOnly(true);
     //m_pInfo->palette().setColor(QPalette::Window,QColor(0,0,0));
     QFile file(":/content/about.html");
-    file.open(QIODevice::ReadOnly);
-    QString html = QString::fromUtf8(file.readAll());
-
-    m_pInfo->setText(html);
-//    m_qt_logo = new QPixmap(":/images/qt_logo_32.png");
-//    m_libgit_logo = new QPixmap(":/images/libgit2_logo.png");
-    //setAutoFillBackground(false);
+    if (file.open(QIODevice::ReadOnly)) {
+        QString html = QString::fromUtf8(file.readAll());
+        m_pInfo->setText(html);
+    }
     m_hue = (int)rand()%360;
     m_timer = startTimer(10000);
 
@@ -70,13 +67,13 @@ void AboutDialog::paintEvent(QPaintEvent *event)
 {
     Q_UNUSED(event);
     QPainter p(this);
-    p.setRenderHint(QPainter::Antialiasing,true);
-    p.setRenderHint(QPainter::TextAntialiasing,true);
+    //p.setRenderHint(QPainter::Antialiasing,true);
+    //p.setRenderHint(QPainter::TextAntialiasing,true);
     QColor ltTxtClr(180,180,180);
     QRectF frame(QPointF(0,0), geometry().size());
     qreal w = m_logo->width();
-    qreal h = m_logo->height()/2;
-    QPointF pixpos = frame.bottomRight() - QPointF(w+10,h);
+    qreal h = m_logo->height();
+    QPointF pixpos = frame.bottomRight() - QPointF(w,h/2);
 
     QLinearGradient linearGradient(0, 0, 0, height());
     linearGradient.setColorAt(0.0, QColor::fromHsl(m_hue,120,120));
@@ -104,7 +101,8 @@ void AboutDialog::paintEvent(QPaintEvent *event)
     p.setPen(ltTxtClr);
     p.setBrush(QColor(0,0,0));
     p.setOpacity(.4);
-    p.drawPixmap(pixpos, *m_logo);
+    //hmm reducing by 80% seems to produce the correct size
+    p.drawPixmap(pixpos.x(), pixpos.y(), w*.8, h*.8, *m_logo);
 }
 
 
