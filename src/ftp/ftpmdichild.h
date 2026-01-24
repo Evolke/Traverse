@@ -1,7 +1,7 @@
 #ifndef FTPMDICHILD_H
 #define FTPMDICHILD_H
 
-#include <QMdiSubWindow>
+#include <QFrame>
 
 #define NAME_COLUMN_WIDTH 200
 
@@ -31,7 +31,7 @@ private:
     QToolButton *m_pConnectBtn;
 };
 
-class FtpMdiChild : public QMdiSubWindow
+class FtpMdiChild : public QFrame
 {
     Q_OBJECT
 public:
@@ -48,6 +48,7 @@ private:
     ConnectHeader *m_pConnectHeader;
     LocalFileView *m_pLocalView;
     RemoteFileView *m_pRemoteView;
+    qint64 m_startTime;
 };
 
 #endif // FTPMDICHILD_H

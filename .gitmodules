@@ -4,3 +4,6 @@
 [submodule "lexilla"]
 	path = lexilla
 	url = https://github.com/ScintillaOrg/lexilla.git
+[submodule "K-Editor"]
+	path = K-Editor
+	url = https://github.com/Evolke/K-Editor.git

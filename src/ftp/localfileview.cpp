@@ -9,6 +9,10 @@
 #include <QFileDialog>
 #include <QFileSystemModel>
 
+/**
+ * @brief LocalFileView::LocalFileView
+ * @param parent
+ */
 LocalFileView::LocalFileView(QWidget *parent)
     : QWidget{parent}
 {
@@ -28,6 +32,9 @@ LocalFileView::LocalFileView(QWidget *parent)
     setLayout(layout);
 }
 
+/**
+ * @brief LocalFileView::browse
+ */
 void LocalFileView::browse()
 {
     QFileDialog fd;
@@ -42,6 +49,11 @@ void LocalFileView::browse()
 
 }
 
+/**
+ * @brief LocalDirInfo::LocalDirInfo
+ * @param sPath
+ * @param parent
+ */
 LocalDirInfo::LocalDirInfo(QString sPath, QWidget *parent)
     : QWidget(parent)
 {
@@ -57,11 +69,19 @@ LocalDirInfo::LocalDirInfo(QString sPath, QWidget *parent)
     setLayout(layout);
 }
 
+/**
+ * @brief LocalDirInfo::setPath
+ * @param sPath
+ */
 void LocalDirInfo::setPath(QString sPath)
 {
     m_pPathEdit->setText(sPath);
 }
 
+/**
+ * @brief LocalDirInfo::getPath
+ * @return
+ */
 QString LocalDirInfo::getPath()
 {
     return m_pPathEdit->text();

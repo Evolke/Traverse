@@ -6,13 +6,14 @@
 #include "prefsdialog.h"
 #include "urlpixmap.h"
 #include "consoledock.h"
-#include "restmdichild.h"
-#include "ftpmdichild.h"
+#include "apiclient/restmdichild.h"
+#include "ftp/ftpmdichild.h"
 
 #include <QMenuBar>
 #include <QToolBar>
 #include <QStatusBar>
 #include <QMdiArea>
+#include <QMdiSubWindow>
 #include <QSettings>
 #include <QApplication>
 #include <QScreen>
@@ -34,7 +35,6 @@ MainWindow::MainWindow(QWidget *parent)
     m_pMdiArea->setTabsMovable(true);
     m_pMdiArea->setTabPosition(QTabWidget::North);
     m_pCurrentChild = Q_NULLPTR;
-
 
     setInstance(this);
 
@@ -236,7 +236,6 @@ void MainWindow::readSettings()
 
     UrlPixmap svgpix(Q_NULLPTR);
 
-
     QStyleOptionToolBar option;
     option.initFrom(m_pToolBar);
     QPalette pal = option.palette;
@@ -263,7 +262,7 @@ void MainWindow::activateChild(QMdiSubWindow *window)
 {
     Q_UNUSED(window);
 
-    QMdiSubWindow *oldChild = m_pCurrentChild;
+    QFrame *oldChild = m_pCurrentChild;
     m_pCurrentChild = currentMdiChild();
     if (oldChild != m_pCurrentChild) {
 
@@ -271,11 +270,7 @@ void MainWindow::activateChild(QMdiSubWindow *window)
 
 }
 
-/**
- * @brief MainWindow::currentMdiChild
- * @return
- */
-QMdiSubWindow* MainWindow::currentMdiChild()
+QFrame* MainWindow::currentMdiChild()
 {
     QMdiSubWindow *currentSubWindow = m_pMdiArea->currentSubWindow();
     if (currentSubWindow)
@@ -284,7 +279,7 @@ QMdiSubWindow* MainWindow::currentMdiChild()
         QString sChildClass = pChild->metaObject()->className();
         if (sChildClass == "RestMdiChild" || sChildClass == "FtpMdiChild")
         {
-            return qobject_cast<QMdiSubWindow *>(pChild);
+            return qobject_cast<QFrame*>(pChild);
         }
     }
 
@@ -307,15 +302,10 @@ void MainWindow::newFtpWindow()
     openTab(new FtpMdiChild(m_pMdiArea));
 }
 
-/**
- * @brief MainWindow::openTab
- * @param pChild
- */
-void MainWindow::openTab(QMdiSubWindow *pChild)
+void MainWindow::openTab(QFrame *pChild)
 {
-    m_pMdiArea->addSubWindow(pChild);
-    pChild->setAttribute(Qt::WA_DeleteOnClose);
-    m_pMdiArea->setActiveSubWindow(pChild);
+    QMdiSubWindow *pSubWnd = m_pMdiArea->addSubWindow(pChild);
+    m_pMdiArea->setActiveSubWindow(pSubWnd);
     pChild->show();
     m_pCurrentChild = pChild;
 }
@@ -325,12 +315,13 @@ void MainWindow::createDocks()
     ConsoleDock* pConsole = new ConsoleDock(tr("Console"));
     m_docks["console"] = pConsole;
     addDockWidget(Qt::BottomDockWidgetArea, pConsole);
+    pConsole->hide();
+
     QAction *conAct = pConsole->toggleViewAction();//new QAction(tr("&Console"),pConsole);
     m_actionMap["console"] = conAct;
     conAct->setCheckable(true);
-    conAct->setChecked(true);
+    conAct->setChecked(false);
     m_pViewMenu->addAction(conAct);
-    //connect(conAct, &QAction::toggled, this, &MainWindow::toggleConsole);
 }
 
 /*void MainWindow::consoleToggled()

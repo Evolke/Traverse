@@ -21,5 +21,6 @@
         <file>images/light_up_arrow.png</file>
         <file>images/sizer_dark.png</file>
         <file>images/sizer_light.png</file>
+        <file>editor_styles/dracula.xml</file>
     </qresource>
 </RCC>

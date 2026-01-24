@@ -1,9 +1,8 @@
 #ifndef RESTMDICHILD_H
 #define RESTMDICHILD_H
 
-#include <QMdiSubWindow>
+#include <QFrame>
 
-QT_BEGIN_NAMESPACE
 class QSplitter;
 class QTextEdit;
 class QComboBox;
@@ -11,8 +10,9 @@ class QLineEdit;
 class QTabWidget;
 class QNetworkAccessManager;
 class QRestAccessManager;
-class TrvScintillaEdit;
-QT_END_NAMESPACE
+class ResponseView;
+class RequestOptions;
+class TrvFormatThread;
 
 class RequestHeader : public QWidget
 {
@@ -22,6 +22,7 @@ public:
 
     QString getURL();
     QString getMethod();
+    void toggleEnableSendButton();
 
 public slots:
 
@@ -31,56 +32,18 @@ private:
     QToolButton *m_pSendBtn;
 };
 
-class ParamsTab: public QWidget
-{
-    Q_OBJECT
-public:
-    explicit ParamsTab(QWidget *parent = nullptr);
 
-};
 
-class AuthTab: public QWidget
-{
-    Q_OBJECT
-public:
-    explicit AuthTab(QWidget *parent = nullptr);
-
-};
-
-class HeadersTab: public QWidget
-{
-    Q_OBJECT
-public:
-    explicit HeadersTab(QWidget *parent = nullptr);
-
-};
-
-class BodyTab: public QWidget
-{
-    Q_OBJECT
-public:
-    explicit BodyTab(QWidget *parent = nullptr);
-
-};
-
-class RequestForm : public QWidget
-{
-    Q_OBJECT
-public:
-    explicit RequestForm(QWidget *parent = nullptr);
-
-private:
-    QTabWidget *m_pTabs;
-};
-
-class RestMdiChild : public QMdiSubWindow
+class RestMdiChild : public QFrame
 {
     Q_OBJECT
 public:
     explicit RestMdiChild(QWidget *parent = nullptr);
+    ~RestMdiChild();
 
 public slots:
     void sendRequest();
+    void formatFinished(QString *formattedText, QString *contentType);
 
 signals:
 
@@ -88,10 +51,12 @@ private:
     QSplitter *m_pSplit;
     QSplitter *m_pSubSplit;
     RequestHeader *m_pRequestHeader;
-    RequestForm *m_pRequestForm;
-    TrvScintillaEdit *m_pResults;
+    RequestOptions *m_pRequestOptions;
+    ResponseView *m_pResponse;
     QRestAccessManager *m_pRestMan;
     QNetworkAccessManager *m_pNetMan;
+    qint64 m_startTime;
+    TrvFormatThread *m_pFormatThread;
 };
 
 #endif // RESTMDICHILD_H
