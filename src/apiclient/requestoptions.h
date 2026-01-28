@@ -6,7 +6,7 @@
 class QTabWidget;
 class QTableWidget;
 class QComboBox;
-class TrvCodeEditor;
+class TrvScintillaEdit;
 class QHttpHeaders;
 class KeyValTableView;
 class DropDownTabWidget;
@@ -54,11 +54,11 @@ class BodyTab: public RequestOptionTab
 public:
     explicit BodyTab(QWidget *parent = nullptr);
 
-    TrvCodeEditor *getEditor() { return m_pBodyEditor; }
+    TrvScintillaEdit *getEditor() { return m_pBodyEditor; }
     int getBodyType();
 
 private:
-    TrvCodeEditor *m_pBodyEditor;
+    TrvScintillaEdit *m_pBodyEditor;
 };
 
 class RequestOptions : public QWidget

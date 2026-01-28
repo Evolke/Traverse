@@ -1,6 +1,6 @@
 #include "requestoptions.h"
 #include "authtab.h"
-#include "../trvcodeeditor.h"
+#include "../trvscintillaedit.h"
 #include "../keyvaltableview.h"
 #include "../dropdowntabwidget.h"
 
@@ -54,7 +54,8 @@ QString RequestOptions::getBodyString()
 {
     QString ret;
     BodyTab *pTab = qobject_cast<BodyTab*>(m_pTabs->widget(3));
-    ret = pTab->getEditor()->toPlainText();
+    TrvScintillaEdit *pEditor = pTab->getEditor();
+    ret = pEditor->getText(pEditor->textLength());
     return ret;
 }
 
@@ -116,7 +117,8 @@ BodyTab::BodyTab(QWidget *parent)
     m_pDTabs = new DropDownTabWidget(this);
     layout->addWidget(m_pDTabs);
     layout->setContentsMargins(0, 0, 0, 0);
-    m_pBodyEditor = new TrvCodeEditor(this);
+    m_pBodyEditor = new TrvScintillaEdit(this);
+    m_pBodyEditor->setContentType("application/json",false);
     m_pDTabs->addTab(new QWidget(m_pDTabs), "None");
     m_pDTabs->addTab(m_pBodyEditor, "JSON");
     RequestOptionTab *pFormDataTab = new RequestOptionTab(m_pDTabs);

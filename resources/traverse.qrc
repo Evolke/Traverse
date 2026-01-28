@@ -21,6 +21,9 @@
         <file>images/light_up_arrow.png</file>
         <file>images/sizer_dark.png</file>
         <file>images/sizer_light.png</file>
-        <file>editor_styles/dracula.xml</file>
+        <file>editor_styles/nppdarkmode.xml</file>
+        <file>editor_styles/nppmonokai.xml</file>
+        <file>editor_styles/nppmaterial.xml</file>
+        <file>editor_styles/npptwilight.xml</file>
     </qresource>
 </RCC>

@@ -6,7 +6,7 @@
 class QTabWidget;
 class QTableWidget;
 class QLabel;
-class TrvCodeEditor;
+class TrvScintillaEdit;
 class QHttpHeaders;
 
 class ResponseStatus : public QWidget
@@ -40,7 +40,7 @@ public:
 signals:
 
 private:
-    TrvCodeEditor *m_pEditor;
+    TrvScintillaEdit *m_pEditor;
     QTableWidget *m_pHeadersTable;
     QTabWidget *m_pTabs;
     ResponseStatus *m_pStatus;

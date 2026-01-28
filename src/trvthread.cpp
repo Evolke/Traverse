@@ -70,7 +70,8 @@ void TrvFormatThread::run()
         QJsonDocument jdoc = QJsonDocument::fromJson(m_data);
         m_sFormattedText = jdoc.toJson();
     } else if (m_contentType.contains(QRegularExpression("application\\/(?:soap\\+)*xml"))) {
-        QDomDocument xdoc = QDomDocument(m_data);
+        QDomDocument xdoc;
+        xdoc.setContent(m_data);
         m_sFormattedText = xdoc.toString();
     } else {
         m_sFormattedText = m_data;
