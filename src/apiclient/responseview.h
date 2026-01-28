@@ -6,7 +6,7 @@
 class QTabWidget;
 class QTableWidget;
 class QLabel;
-class TrvCodeEditor;
+class TrvScintillaEdit;
 class QHttpHeaders;
 
 class ResponseStatus : public QWidget
@@ -31,7 +31,7 @@ class ResponseView : public QWidget
 public:
     explicit ResponseView(QWidget *parent = nullptr);
 
-    void setDataWithHeaders(QByteArray& data, QHttpHeaders &headers);
+    void setDataWithHeaders(QString &formattedText, QString &contentType);
     void setStatus(int status);
     void setExecTime(qint64 time);
     void setHeaders(QHttpHeaders &headers);
@@ -40,7 +40,7 @@ public:
 signals:
 
 private:
-    TrvCodeEditor *m_pEditor;
+    TrvScintillaEdit *m_pEditor;
     QTableWidget *m_pHeadersTable;
     QTabWidget *m_pTabs;
     ResponseStatus *m_pStatus;

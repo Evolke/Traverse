@@ -61,11 +61,11 @@ QTableView, QTableWidget {
     selection-color: #eee;
     selection-background-color: #222;
     outline: 0;
-    border: 1px solid #444;
+    border: 1px solid #888;
 }
 
 QTableView::item, QTableWidget::item {
-    border: 0;
+    border: 1px solid #888;
     padding: 2px 0;
     background-color: #333333;
 }
@@ -438,7 +438,7 @@ QScrollBar::right-arrow:horizontal {
 }
 
 QScrollBar::handle:vertical, QScrollBar::handle:horizontal {
-    border: 1px solid #555;
+    border: 1px solid #777;
     background: #333;
 }
 
@@ -448,7 +448,7 @@ QScrollBar::handle:vertical {
 }
 
 QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical, QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {
-    border: 1px solid #444;
+    border: 1px solid #777;
     background: #333;
  }
 
@@ -496,34 +496,4 @@ QProgressBar::chunk {
     background-color: #080;
     width: 10px;
     margin: 0;
-}
-
-ContentView {
-}
-
-ContentInfoWidget {
-    color: #DDDDDD;
-    background-color: #222222;
-    border: none;
-}
-
-ContentInfoTypeLabel {
-    color: #aaa;
-    background-color: #222;
-    border-right: 1px solid #555;
-}
-
-CommitMessageEdit {
-    background-color: #303030;
-    border: 1px solid #444;
-    border-radius: 3px;
-}
-
-CommitFilesScrollArea {
-    border: none;
-}
-
-CommitTabsToolbar {
-    border: none;
-    outline: none;
 }

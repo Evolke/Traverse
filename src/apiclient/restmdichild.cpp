@@ -1,6 +1,8 @@
 #include "restmdichild.h"
 #include "../mainwindow.h"
 #include "responseview.h"
+#include "requestoptions.h"
+#include "../trvthread.h"
 
 #include <QSplitter>
 #include <QTextEdit>
@@ -32,16 +34,22 @@ RestMdiChild::RestMdiChild(QWidget *parent)
     m_pSplit->addWidget(m_pRequestHeader);
     m_pSubSplit = new QSplitter(Qt::Horizontal, m_pSplit);
     m_pSplit->addWidget(m_pSubSplit);
-    m_pRequestForm = new RequestForm(m_pSubSplit);
-    m_pSubSplit->addWidget(m_pRequestForm);
+    m_pRequestOptions = new RequestOptions(m_pSubSplit);
+    m_pSubSplit->addWidget(m_pRequestOptions);
     m_pResponse = new ResponseView(m_pSubSplit);
     m_pSubSplit->addWidget(m_pResponse);
     m_pNetMan = new QNetworkAccessManager(this);
     m_pRestMan = new QRestAccessManager(m_pNetMan);
     layout->setContentsMargins(0,0,0,0);
     setLayout(layout);
+    m_pFormatThread = new TrvFormatThread();
+    connect(m_pFormatThread, SIGNAL(formatFinished(QString*, QString*)), this, SLOT(formatFinished(QString*, QString*)));
 }
 
+RestMdiChild::~RestMdiChild()
+{
+    delete m_pFormatThread;
+}
 /**
  * @brief RestMdiChild::sendRequest
  */
@@ -54,20 +62,34 @@ void RestMdiChild::sendRequest()
         QString method = m_pRequestHeader->getMethod();
         QUrl url(sUrl);
         QNetworkRequest req(url);
-        QByteArray data;
-        m_startTime = QDateTime::currentMSecsSinceEpoch();
+        QHttpHeaders headers = m_pRequestOptions->getHeaders();
+        QByteArray data = m_pRequestOptions->getBodyString().toUtf8();
+        if (data.length() > 0) {
+            headers.append(QHttpHeaders::WellKnownHeader::ContentType,"application/json");
+            headers.append(QHttpHeaders::WellKnownHeader::ContentLength, QString::number(data.length()));
+        }
+        req.setHeaders(headers);
 
+        m_startTime = QDateTime::currentMSecsSinceEpoch();
+        m_pRequestHeader->toggleEnableSendButton();
         m_pRestMan->sendCustomRequest(req, method.toUtf8(),  data,  this, [this](QRestReply &reply) {
             MainWindow *pMain = MainWindow::getInstance();
             qint64 execTime = QDateTime::currentMSecsSinceEpoch() - m_startTime;
             QByteArray data = reply.readBody();
             QHttpHeaders headers = reply.networkReply()->headers();
+            QString contentType = headers.value(QHttpHeaders::WellKnownHeader::ContentType).toByteArray();
+            m_pResponse->setHeaders(headers);
+
             if (data.length() > 0 || reply.hasError()) {
                 if (data.length() == 0) { data = reply.errorString().toUtf8(); }
-                m_pResponse->setDataWithHeaders(data, headers);
                 m_pResponse->setStatus(reply.httpStatus());
                 m_pResponse->setExecTime(execTime);
                 m_pResponse->setSize(data.length());
+                QString sText = data;
+                //m_pResponse->setDataWithHeaders(sText, contentType);
+                m_pFormatThread->format(data,contentType);
+            } else {
+                m_pRequestHeader->toggleEnableSendButton();
             }
 
             pMain->toggleProgressBar();
@@ -78,6 +100,12 @@ void RestMdiChild::sendRequest()
         msgBox.setText("URL is missing");
         msgBox.exec();
     }
+}
+
+void RestMdiChild::formatFinished(QString *formattedText, QString *contentType)
+{
+    m_pResponse->setDataWithHeaders(*formattedText, *contentType);
+    m_pRequestHeader->toggleEnableSendButton();
 }
 
 /**
@@ -92,9 +120,6 @@ RequestHeader::RequestHeader(QWidget *parent)
     QStringList methods = {"GET", "POST", "PUT", "PATCH"};
     m_pMethodCB->addItems(methods);
     m_pUrlEdit = new QLineEdit(this);
-    QString regEx = "^https?:\\/\\/(?:www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b(?:[-a-zA-Z0-9()@:%_\\+.\\,~#?&\\/=]*)$";
-    QRegularExpressionValidator *urlValidator = new QRegularExpressionValidator(QRegularExpression(regEx),this);
-    m_pUrlEdit->setValidator(urlValidator);
     m_pSendBtn = new QToolButton(this);
     m_pSendBtn->setText(tr("Send"));
     m_pSendBtn->setArrowType(Qt::RightArrow);
@@ -128,68 +153,7 @@ QString RequestHeader::getMethod()
     return m_pMethodCB->currentText();
 }
 
-/**
- * @brief ParamsTab::ParamsTab
- * @param parent
- */
-ParamsTab::ParamsTab(QWidget *parent)
-    : QWidget(parent)
+void RequestHeader::toggleEnableSendButton()
 {
-    QVBoxLayout *layout = new QVBoxLayout;
-    layout->addWidget(new QLabel(tr("Params")));
-    setLayout(layout);
-}
-
-/**
- * @brief AuthTab::AuthTab
- * @param parent
- */
-AuthTab::AuthTab(QWidget *parent)
-    : QWidget(parent)
-{
-    QVBoxLayout *layout = new QVBoxLayout;
-    layout->addWidget(new QLabel(tr("Auth")));
-    setLayout(layout);
-}
-
-/**
- * @brief HeadersTab::HeadersTab
- * @param parent
- */
-HeadersTab::HeadersTab(QWidget *parent)
-    : QWidget(parent)
-{
-    QVBoxLayout *layout = new QVBoxLayout;
-    layout->addWidget(new QLabel(tr("Headers")));
-    setLayout(layout);
-}
-
-/**
- * @brief BodyTab::BodyTab
- * @param parent
- */
-BodyTab::BodyTab(QWidget *parent)
-    : QWidget(parent)
-{
-    QVBoxLayout *layout = new QVBoxLayout;
-    layout->addWidget(new QLabel(tr("Body")));
-    setLayout(layout);
-}
-
-/**
- * @brief RequestForm::RequestForm
- * @param parent
- */
-RequestForm::RequestForm(QWidget *parent)
-    : QWidget(parent)
-{
-    QVBoxLayout *layout = new QVBoxLayout;
-    m_pTabs =  new QTabWidget(this);
-    m_pTabs->addTab(new ParamsTab(m_pTabs),tr("Params"));
-    m_pTabs->addTab(new AuthTab(m_pTabs),tr("Auth"));
-    m_pTabs->addTab(new HeadersTab(m_pTabs),tr("Headers"));
-    m_pTabs->addTab(new BodyTab(m_pTabs),tr("Body"));
-    layout->addWidget(m_pTabs);
-    layout->setContentsMargins(0,0,0,0);
-    setLayout(layout);
+    m_pSendBtn->setDisabled(m_pSendBtn->isEnabled());
 }

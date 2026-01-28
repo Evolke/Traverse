@@ -57,7 +57,6 @@ void MainWindow::init()
     m_pStatProg = new StatusProgressBar(pStat);
     pStat->addPermanentWidget(m_pStatProg);
     createActions();
-    //createDocks must follow createActions
     createDocks();
 
     readSettings();
@@ -111,8 +110,11 @@ void MainWindow::createActions()
     tbAct->setChecked(true);
     sbAct->setCheckable(true);
     sbAct->setChecked(true);
+
     connect(tbAct, &QAction::toggled, this, &MainWindow::toggleToolBar);
     connect(sbAct, &QAction::toggled, this, &MainWindow::toggleStatusBar);
+    m_actionMap["toolbar"] = tbAct;
+    m_actionMap["statusbar"] = sbAct;
 
     QAction *abtAct = new QAction(tr("About"));
     helpMenu->addAction(abtAct);
@@ -184,6 +186,7 @@ void MainWindow::toggleStatusBar()
     }
 }
 
+
 void MainWindow::toggleToolBar()
 {
     if (m_pToolBar->isVisible())
@@ -229,7 +232,6 @@ void MainWindow::readSettings()
             nTBStyle = Qt::ToolButtonIconOnly;
             break;
     }
-
     m_pToolBar->setToolButtonStyle(nTBStyle);
 
     UrlPixmap svgpix(Q_NULLPTR);
@@ -258,6 +260,8 @@ void MainWindow::writeSettings()
 
 void MainWindow::activateChild(QMdiSubWindow *window)
 {
+    Q_UNUSED(window);
+
     QFrame *oldChild = m_pCurrentChild;
     m_pCurrentChild = currentMdiChild();
     if (oldChild != m_pCurrentChild) {
@@ -282,11 +286,17 @@ QFrame* MainWindow::currentMdiChild()
     return Q_NULLPTR;
 }
 
+/**
+ * @brief MainWindow::newRequestWindow
+ */
 void MainWindow::newRequestWindow()
 {
     openTab(new RestMdiChild(m_pMdiArea));
 }
 
+/**
+ * @brief MainWindow::newFtpWindow
+ */
 void MainWindow::newFtpWindow()
 {
     openTab(new FtpMdiChild(m_pMdiArea));
@@ -313,6 +323,16 @@ void MainWindow::createDocks()
     conAct->setChecked(false);
     m_pViewMenu->addAction(conAct);
 }
+
+/*void MainWindow::consoleToggled()
+{
+    QAction *pConAct = m_actionMap["console"];
+    QDockWidget *pConsole = m_docks["console"];
+
+    if (pConAct != nullptr && pConsole != nullptr) {
+        pConAct->setChecked(pConsole->isVisible());
+    }
+}*/
 
 void MainWindow::setTheme(const QString &theme)
 {

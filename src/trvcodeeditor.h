@@ -11,8 +11,9 @@ class TrvCodeEditor : public QCodeEditor
 public:
     explicit TrvCodeEditor(QWidget *parent = nullptr);
 
-    void setJson(QJsonDocument &jdoc);
-    void setXml(QDomDocument &xdoc);
+    void setJson(QString &text);
+    void setXml(QString &text);
+    void setText(QString &text);
 
 signals:
 

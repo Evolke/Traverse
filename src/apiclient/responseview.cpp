@@ -1,5 +1,5 @@
 #include "responseview.h"
-#include "../trvcodeeditor.h"
+#include "../trvscintillaedit.h"
 
 #include <QTabWidget>
 #include <QVBoxLayout>
@@ -20,7 +20,7 @@ ResponseView::ResponseView(QWidget *parent)
 {
     QVBoxLayout *layout = new QVBoxLayout;
     m_pTabs =  new QTabWidget(this);
-    m_pEditor = new TrvCodeEditor(m_pTabs);
+    m_pEditor = new TrvScintillaEdit(m_pTabs);
     m_pHeadersTable = new QTableWidget(m_pTabs);
     m_pHeadersTable->verticalHeader()->setVisible(false);
     QStringList headings = {"Key", "Value"};
@@ -28,7 +28,7 @@ ResponseView::ResponseView(QWidget *parent)
     m_pHeadersTable->setHorizontalHeaderLabels(headings);
     m_pHeadersTable->setVerticalHeaderLabels({""});
     m_pTabs->addTab(m_pEditor, tr("Body"));
-    m_pEditor->setReadOnly(true);
+    //m_pEditor->setReadOnly(true);
     m_pTabs->addTab(m_pHeadersTable, tr("Headers"));
     m_pStatus = new ResponseStatus(this);
     layout->addWidget(m_pTabs);
@@ -38,19 +38,11 @@ ResponseView::ResponseView(QWidget *parent)
 }
 
 
-void ResponseView::setDataWithHeaders(QByteArray& data, QHttpHeaders &headers)
+void ResponseView::setDataWithHeaders(QString &formattedText, QString &contentType)
 {
-    QByteArrayView contentType = headers.value(QHttpHeaders::WellKnownHeader::ContentType);
-    QString sContentType = contentType.toByteArray();
-    if (sContentType.contains(QRegularExpression("(application|text)\\/json"))) {
-        QJsonDocument jdoc = QJsonDocument::fromJson(data);
-        m_pEditor->setJson(jdoc);
-    } else if (sContentType.contains(QRegularExpression("application\\/(?:soap\\+)*xml"))) {
-        QDomDocument xdoc;
-        xdoc.setContent(data);
-        m_pEditor->setXml(xdoc);
-    }
-    setHeaders(headers);
+    QByteArray data = formattedText.toUtf8();
+    m_pEditor->setText(data.constData());
+    m_pEditor->setContentType(contentType);
 }
 
 /**
