@@ -1,0 +1,6 @@
+[submodule "scintilla"]
+	path = scintilla
+	url = https://github.com/mirror/scintilla
+[submodule "lexilla"]
+	path = lexilla
+	url = https://github.com/ScintillaOrg/lexilla.git
