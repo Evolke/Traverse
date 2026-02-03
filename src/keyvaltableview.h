@@ -3,13 +3,7 @@
 
 #include <QAbstractTableModel>
 #include <QTableView>
-
-struct KeyValItem
-{
-    KeyValItem(QString ikey, QString ival) { key = ikey; value = ival; }
-    QString key;
-    QString value;
-};
+#include "trv_defines.h"
 
 class KeyValTableModel : public QAbstractTableModel
 {
@@ -25,9 +19,10 @@ public:
                         int role = Qt::DisplayRole) const override;
     Qt::ItemFlags flags(const QModelIndex &index) const override;
     void addRow();
+    KeyValList getKeyValList() { return m_kvList; }
 
 private:
-    QList<KeyValItem> m_kvList;
+    KeyValList m_kvList;
     QStringList m_headings;
 };
 

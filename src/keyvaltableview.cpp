@@ -51,6 +51,8 @@ KeyValTableModel::KeyValTableModel(QObject *parent)
 
 int KeyValTableModel::rowCount(const QModelIndex &index) const
 {
+    Q_UNUSED(index)
+
     return m_kvList.count();
 }
 
@@ -63,6 +65,8 @@ void KeyValTableModel::addRow()
 
 int KeyValTableModel::columnCount(const QModelIndex &index) const
 {
+    Q_UNUSED(index)
+
     return 2;
 }
 

@@ -15,9 +15,26 @@
 TrvScintillaEdit::TrvScintillaEdit(QWidget *parent)
     : ScintillaEdit{parent}, m_font(DEFAULT_FONT)
 {
+
     m_pStyles = nullptr;
     setMargins(SC_MAX_MARGIN + 2);
+    setTabWidth(4);
 
+    setupGlobalStyles();
+
+    updateLineNumberMarginWidth(1, m_font, lineCount());
+
+
+    setScrollWidthTracking(true);
+    setScrollWidth(1);
+    //setWrapVisualFlags(SC_WRAPVISUALFLAG_MARGIN);
+
+    connect(this, &TrvScintillaEdit::modified, this, &TrvScintillaEdit::onModified);
+    connect(this, &TrvScintillaEdit::marginClicked, this, &TrvScintillaEdit::toggleFolding);
+}
+
+void TrvScintillaEdit::setupGlobalStyles()
+{
     QColor foreClr = QColor::fromRgb(200,200,200);
     QColor backClr = QColor::fromRgb(52,52,52);
     QColor marginBackClr = QColor::fromRgb(48,48,48);
@@ -25,14 +42,13 @@ TrvScintillaEdit::TrvScintillaEdit(QWidget *parent)
 
     styleSetFore(STYLE_DEFAULT,QCOLOR_TO_SPRT(foreClr));
     styleSetBack(STYLE_DEFAULT,QCOLOR_TO_SPRT(backClr));
+    styleSetFont(STYLE_DEFAULT, m_font.family().toUtf8().constData());
+    styleSetSize(STYLE_DEFAULT, 10);
+    styleClearAll();
     styleSetBack(SC_MARGIN_BACK,QCOLOR_TO_SPRT(backClr));
     styleSetBack(SC_MARGIN_FORE,QCOLOR_TO_SPRT(backClr));
     setCaretFore(QCOLOR_TO_SPRT(foreClr));
-    styleSetFont(STYLE_DEFAULT, m_font.family().toUtf8().constData());
-    styleSetSize(STYLE_DEFAULT, 10);
-    updateLineNumberMarginWidth(1, m_font, lineCount());
 
-    styleClearAll();
     styleSetBack(STYLE_LINENUMBER,QCOLOR_TO_SPRT(marginBackClr));
     styleSetFore(STYLE_LINENUMBER,QCOLOR_TO_SPRT(foreClr));
     setMarginBackN(MARGIN_LINE_NUMBERS, QCOLOR_TO_SPRT(marginBackClr));
@@ -40,13 +56,13 @@ TrvScintillaEdit::TrvScintillaEdit(QWidget *parent)
     setSelFore(true, QCOLOR_TO_SPRT(foreClr));
     setSelBack(true, QCOLOR_TO_SPRT(selClr));
 
-    connect(this, &TrvScintillaEdit::modified, this, &TrvScintillaEdit::onModified);
-    connect(this, &TrvScintillaEdit::marginClicked, this, &TrvScintillaEdit::toggleFolding);
 }
 
 int TrvScintillaEdit::stringWidth(const QString& string, const QFontMetrics& metrics) {
     const QStringList lines = string.split(QLatin1Char('\n'));
     int width = 0;
+
+    auto nbWidth = textWidth(STYLE_LINENUMBER, "8");
 
     foreach (const QString& line, lines) {
         int line_width = metrics.boundingRect(line).width();
@@ -56,6 +72,11 @@ int TrvScintillaEdit::stringWidth(const QString& string, const QFontMetrics& met
         }
     }
 
+    nbWidth *= 3;
+
+    if (width < nbWidth) {
+        width = nbWidth;
+    }
     return width;
 }
 
@@ -64,8 +85,7 @@ void TrvScintillaEdit::onModified(Scintilla::ModificationFlags type, Scintilla::
 {
     if (linesAdded != 0) {
         updateLineNumberMarginWidth(1, m_font, lineCount());
-    }
-}
+    }}
 
 void TrvScintillaEdit::toggleFolding(Scintilla::Position position, Scintilla::KeyMod modifiers, int margin) {
     Q_UNUSED(modifiers)
@@ -88,10 +108,18 @@ void TrvScintillaEdit::updateLineNumberMarginWidth(sptr_t zoom, QFont font, sptr
     font.setPointSize(font.pointSize() + int(zoom));
 
     QFontMetrics metr(font);
-    int width = stringWidth(QString::number(line_count), metr) + MARGIN_PADDING_LINE_NUMBERS +5;
+    int width = stringWidth(QString::number(line_count), metr) + MARGIN_PADDING_LINE_NUMBERS;
 
-    setMarginWidthN(MARGIN_LINE_NUMBERS, qMax(MARGIN_LINE_NUMBERS_MIN_WIDTH + MARGIN_PADDING_LINE_NUMBERS, width));
+    setMarginWidthN(MARGIN_LINE_NUMBERS, width);
     setMarginWidthN(MARGIN_LINE_NUMBERS_RIGHT_SPACE, MARGIN_PADDING_LINE_NUMBERS);
+}
+
+void TrvScintillaEdit::setScrollWidth(sptr_t pixelWidth) {
+    send(SCI_SETSCROLLWIDTH, pixelWidth, 0);
+}
+
+void TrvScintillaEdit::setScrollWidthTracking(bool tracking) {
+    send(SCI_SETSCROLLWIDTHTRACKING, tracking, 0);
 }
 
 void TrvScintillaEdit::setMargins(sptr_t margins)
@@ -102,6 +130,30 @@ void TrvScintillaEdit::setMargins(sptr_t margins)
 void TrvScintillaEdit::setMarginWidthN(sptr_t margin, sptr_t pixelWidth)
 {
     send(SCI_SETMARGINWIDTHN, margin, pixelWidth);
+}
+
+sptr_t TrvScintillaEdit::textWidth(sptr_t style, const char * text) {
+    return send(SCI_TEXTWIDTH, style, (sptr_t)text);
+}
+
+sptr_t TrvScintillaEdit::linesOnScreen() const {
+    return send(SCI_LINESONSCREEN, 0, 0);
+}
+
+sptr_t TrvScintillaEdit::firstVisibleLine() const {
+    return send(SCI_GETFIRSTVISIBLELINE, 0, 0);
+}
+
+sptr_t TrvScintillaEdit::visibleFromDocLine(sptr_t docLine) {
+    return send(SCI_VISIBLEFROMDOCLINE, docLine, 0);
+}
+
+sptr_t TrvScintillaEdit::docLineFromVisible(sptr_t displayLine) {
+    return send(SCI_DOCLINEFROMVISIBLE, displayLine, 0);
+}
+
+void TrvScintillaEdit::setMarginLeft(sptr_t pixelWidth) {
+    send(SCI_SETMARGINLEFT, 0, pixelWidth);
 }
 
 void TrvScintillaEdit::styleSetFore(sptr_t style, sptr_t fore) {
@@ -184,10 +236,42 @@ void TrvScintillaEdit::setProperty(const char * key, const char * value) {
     send(SCI_SETPROPERTY, (sptr_t)key, (sptr_t)value);
 }
 
-void TrvScintillaEdit::setText(const char * text) {
+void TrvScintillaEdit::setTabWidth(sptr_t tabWidth) {
+    send(SCI_SETTABWIDTH, tabWidth, 0);
+}
+
+void TrvScintillaEdit::setWrapMode(sptr_t wrapMode) {
+    send(SCI_SETWRAPMODE, wrapMode, 0);
+}
+
+sptr_t TrvScintillaEdit::wrapMode() const {
+    return send(SCI_GETWRAPMODE, 0, 0);
+}
+
+void TrvScintillaEdit::setWrapVisualFlags(sptr_t wrapVisualFlags) {
+    send(SCI_SETWRAPVISUALFLAGS, wrapVisualFlags, 0);
+}
+
+sptr_t TrvScintillaEdit::wrapVisualFlags() const {
+    return send(SCI_GETWRAPVISUALFLAGS, 0, 0);
+}
+
+void TrvScintillaEdit::setText(const char * text)
+{
+    bool bReadOnly = readOnly();
+    if (bReadOnly) { setReadOnly(false); }
     send(SCI_SETTEXT, 0, (sptr_t)text);
     QFont f(DEFAULT_FONT);
     updateLineNumberMarginWidth(1, m_font, lineCount());
+    if (bReadOnly) { setReadOnly(true); }
+}
+
+void TrvScintillaEdit::setReadOnly(bool readOnly) {
+    send(SCI_SETREADONLY, readOnly, 0);
+}
+
+bool TrvScintillaEdit::readOnly() const {
+    return send(SCI_GETREADONLY, 0, 0);
 }
 
 QByteArray TrvScintillaEdit::getText(sptr_t length) {
@@ -232,6 +316,14 @@ void TrvScintillaEdit::clearDocumentStyle() {
     send(SCI_CLEARDOCUMENTSTYLE, 0, 0);
 }
 
+sptr_t TrvScintillaEdit::docPointer() const {
+    return send(SCI_GETDOCPOINTER, 0, 0);
+}
+
+void TrvScintillaEdit::setDocPointer(sptr_t doc) {
+    send(SCI_SETDOCPOINTER, 0, doc);
+}
+
 void TrvScintillaEdit::colourise(sptr_t start, sptr_t end) {
     send(SCI_COLOURISE, start, end);
 }
@@ -252,37 +344,37 @@ void TrvScintillaEdit::setupFoldSettings()
     setMarginSensitiveN(MARGIN_FOLDING, true);
     setMarginMaskN(MARGIN_FOLDING, SC_MASK_FOLDERS);
 
-    markerDefine(SC_MARKNUM_FOLDER, SC_MARK_PLUS);
-    markerDefine(SC_MARKNUM_FOLDEROPEN, SC_MARK_MINUS);
-    markerDefine(SC_MARKNUM_FOLDEREND, SC_MARK_CIRCLEPLUSCONNECTED);
-    markerDefine(SC_MARKNUM_FOLDEROPENMID, SC_MARK_CIRCLEMINUSCONNECTED);
-    markerDefine(SC_MARKNUM_FOLDERSUB, SC_MARK_VLINE);
-    markerDefine(SC_MARKNUM_FOLDERMIDTAIL, SC_MARK_TCORNER);
-    markerDefine(SC_MARKNUM_FOLDERTAIL, SC_MARK_LCORNER);
+    markerDefine(SC_MARKNUM_FOLDER, SC_MARK_ARROW);
+    markerDefine(SC_MARKNUM_FOLDEROPEN, SC_MARK_ARROWDOWN);
+    markerDefine(SC_MARKNUM_FOLDEREND, SC_MARK_EMPTY);
+    markerDefine(SC_MARKNUM_FOLDEROPENMID, SC_MARK_EMPTY);
+    markerDefine(SC_MARKNUM_FOLDERSUB, SC_MARK_EMPTY);
+    markerDefine(SC_MARKNUM_FOLDERMIDTAIL, SC_MARK_EMPTY);
+    markerDefine(SC_MARKNUM_FOLDERTAIL, SC_MARK_EMPTY);
 
     markerSetBack(SC_MARKNUM_FOLDER, QCOLOR_TO_SPRT(foreClr));
-    //markerSetFore(SC_MARKNUM_FOLDER, QCOLOR_TO_SPRT(foreClr));
+    markerSetFore(SC_MARKNUM_FOLDER, QCOLOR_TO_SPRT(marginBackClr));
     markerSetBack(SC_MARKNUM_FOLDEROPEN, QCOLOR_TO_SPRT(foreClr));
-    markerSetBack(SC_MARKNUM_FOLDEREND, QCOLOR_TO_SPRT(foreClr));
-    markerSetBack(SC_MARKNUM_FOLDEROPENMID, QCOLOR_TO_SPRT(foreClr));
+    markerSetFore(SC_MARKNUM_FOLDEROPEN, QCOLOR_TO_SPRT(marginBackClr));
+    //markerSetBack(SC_MARKNUM_FOLDEROPENMID, QCOLOR_TO_SPRT(foreClr));
 
     //markerSetFore(SC_MARKNUM_FOLDEROPEN, QCOLOR_TO_SPRT(foreClr));
 
     // Lines.
-    markerSetBack(SC_MARKNUM_FOLDERSUB, QCOLOR_TO_SPRT(foreClr));
+    //markerSetBack(SC_MARKNUM_FOLDERSUB, QCOLOR_TO_SPRT(foreClr));
     //markerSetFore(SC_MARKNUM_FOLDERSUB, QCOLOR_TO_SPRT(foreClr));
-    markerSetBack(SC_MARKNUM_FOLDERMIDTAIL, QCOLOR_TO_SPRT(foreClr));
+    //markerSetBack(SC_MARKNUM_FOLDERMIDTAIL, QCOLOR_TO_SPRT(foreClr));
     //markerSetFore(SC_MARKNUM_FOLDERMIDTAIL, QCOLOR_TO_SPRT(foreClr));
-    markerSetBack(SC_MARKNUM_FOLDERTAIL, QCOLOR_TO_SPRT(foreClr));
+    //markerSetBack(SC_MARKNUM_FOLDERTAIL, QCOLOR_TO_SPRT(foreClr));
     //markerSetFore(SC_MARKNUM_FOLDERTAIL, QCOLOR_TO_SPRT(foreClr));
-    setFoldFlags(SC_FOLDFLAG_LINEAFTER_CONTRACTED | SC_FOLDFLAG_LINEBEFORE_CONTRACTED);
+    setFoldFlags(SC_FOLDFLAG_LINEBEFORE_CONTRACTED | SC_FOLDFLAG_LINEAFTER_CONTRACTED);
 
     setMarginSensitiveN(MARGIN_FOLDING, true);
     setFoldMarginColour(true, QCOLOR_TO_SPRT(marginBackClr));
     setFoldMarginHiColour(true, QCOLOR_TO_SPRT(marginBackClr));
     styleSetBack(SC_MARGIN_BACK,QCOLOR_TO_SPRT(marginBackClr));
     //styleSetBack(SC_MARGIN_FORE,QCOLOR_TO_SPRT(foreClr));
-    //markerEnableHighlight(true);
+    markerEnableHighlight(true);
 }
 
 void TrvScintillaEdit::setupKeywords(lang langType)
@@ -352,23 +444,26 @@ void TrvScintillaEdit::setStylesByName(QString sLangName)
 void TrvScintillaEdit::setContentType(QString sContentType, bool bFold)
 {
     if (!loadStyles()) { return; }
+    // sptr_t doc = docPointer();
+    // setDocPointer(0);
+    clearDocumentStyle();
 
     if (sContentType.contains(QRegularExpression("(application|text)\\/json"))) {
         setILexer((sptr_t)CreateLexer("json"));
+        setupKeywords(JSON);
         setStylesByName("json");
         setProperty("lexer.json.escape.sequence","1");
-        setupKeywords(JSON);
     } else if (sContentType.contains(QRegularExpression("application\\/(?:soap\\+)*xml"))) {
         setILexer((sptr_t)CreateLexer("xml"));
-        setStylesByName("xml");
         setupKeywords(XML);
+        setStylesByName("xml");
     } else {
         setILexer((sptr_t)CreateLexer("hypertext"));
         setStylesByName("html");
     }
-    clearDocumentStyle();
     if (bFold) {
         setupFoldSettings();
     }
     colourise(0, -1);
+    //setDocPointer(doc);
 }

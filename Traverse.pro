@@ -53,8 +53,8 @@ HEADERS += \
     src/ftp/remotefileview.h \
     src/apiclient/restmdichild.h \
     src/statusprogressbar.h \
+    src/trv_defines.h \
     src/trv_storage.h \
-    src/trv_version.h \
     src/trvdialog.h \
     src/trvscintillaedit.h \
     src/trvthread.h \

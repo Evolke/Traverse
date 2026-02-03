@@ -1,4 +1,4 @@
-#include "trv_version.h"
+#include "trv_defines.h"
 #include "aboutdialog.h"
 #include <QPainter>
 #include <QTextStream>

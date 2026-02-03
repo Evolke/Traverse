@@ -2,6 +2,7 @@
 #define RESTMDICHILD_H
 
 #include <QFrame>
+#include <QtNetwork/QHttpMultiPart>
 
 class QSplitter;
 class QTextEdit;
@@ -13,6 +14,8 @@ class QRestAccessManager;
 class ResponseView;
 class RequestOptions;
 class TrvFormatThread;
+class QHttpHeaders;
+class QRestReply;
 
 class RequestHeader : public QWidget
 {
@@ -48,6 +51,10 @@ public slots:
 signals:
 
 private:
+    void buildMultiPartFormData(QHttpMultiPart &mpData);
+    void prepareBody(QHttpHeaders &headers);
+    void HandleReply(QRestReply *pReply);
+
     QSplitter *m_pSplit;
     QSplitter *m_pSubSplit;
     RequestHeader *m_pRequestHeader;
@@ -57,6 +64,8 @@ private:
     QNetworkAccessManager *m_pNetMan;
     qint64 m_startTime;
     TrvFormatThread *m_pFormatThread;
+    QByteArray m_data;
+    QHttpMultiPart m_mpData;
 };
 
 #endif // RESTMDICHILD_H

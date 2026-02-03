@@ -21,6 +21,7 @@ ResponseView::ResponseView(QWidget *parent)
     QVBoxLayout *layout = new QVBoxLayout;
     m_pTabs =  new QTabWidget(this);
     m_pEditor = new TrvScintillaEdit(m_pTabs);
+    m_pEditor->setReadOnly(true);
     m_pHeadersTable = new QTableWidget(m_pTabs);
     m_pHeadersTable->verticalHeader()->setVisible(false);
     QStringList headings = {"Key", "Value"};
@@ -163,11 +164,11 @@ void ResponseStatus::setExecTime(qint64 time)
  */
 void ResponseStatus::setSize(qsizetype size)
 {
-    QString sUnits = "B";
+    QString sUnits = "b";
     qreal output = size;
     if (size > 1024) {
         output = static_cast<long double>(size) / 1024;
-        sUnits = "KB";
+        sUnits = "kb";
     }
     QString sSize = QString::number(output);
     sSize += sUnits;

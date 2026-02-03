@@ -27,10 +27,13 @@ class TrvScintillaEdit : public ScintillaEdit
 public:
     explicit TrvScintillaEdit(QWidget *parent = nullptr);
 
+    void setupGlobalStyles();
     void setContentType(QString sContentType, bool bFold=true);
     void setText(const char * text);
     QByteArray getText(sptr_t length);
     sptr_t textLength() const;
+    void setReadOnly(bool readOnly);
+    bool readOnly() const;
 
     void updateLineNumberMarginWidth(sptr_t zoom, QFont font, sptr_t line_count);
     int stringWidth(const QString& string, const QFontMetrics& metrics);
@@ -43,8 +46,11 @@ public slots:
 signals:
 
 private:
+    void setScrollWidth(sptr_t pixelWidth);
+    void setScrollWidthTracking(bool tracking);
     void setMargins(sptr_t margins);
     void setMarginWidthN(sptr_t margin, sptr_t pixelWidth);
+    void setMarginLeft(sptr_t pixelWidth);
     void styleSetFore(sptr_t style, sptr_t fore);
     void styleSetBack(sptr_t style, sptr_t back);
     void setSelFore(bool useSetting, sptr_t fore);
@@ -54,7 +60,19 @@ private:
     void styleSetFont(sptr_t style, const char * fontName);
     void styleSetSize(sptr_t style, sptr_t sizePoints);
     void setMarginBackN(sptr_t margin, sptr_t back);
+    sptr_t linesOnScreen() const;
+    sptr_t firstVisibleLine() const;
+    sptr_t visibleFromDocLine(sptr_t docLine);
+    sptr_t docLineFromVisible(sptr_t displayLine);
     void setProperty(const char * key, const char * value);
+    sptr_t textWidth(sptr_t style, const char * text);
+
+    void setTabWidth(sptr_t tabWidth);
+    void setWrapMode(sptr_t wrapMode);
+    sptr_t wrapMode() const;
+    void setWrapVisualFlags(sptr_t wrapVisualFlags);
+    sptr_t wrapVisualFlags() const;
+
     void setFoldMarginColour(bool useSetting, sptr_t back);
     void setFoldMarginHiColour(bool useSetting, sptr_t fore);
     void setCaretFore(sptr_t fore);
@@ -77,6 +95,9 @@ private:
     void toggleFold(sptr_t line);
 
     void clearDocumentStyle();
+    sptr_t docPointer() const;
+    void setDocPointer(sptr_t doc);
+
     void setupFoldSettings();
     bool loadStyles();
     void setupKeywords(lang langType);

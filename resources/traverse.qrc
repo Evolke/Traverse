@@ -25,5 +25,6 @@
         <file>editor_styles/nppmonokai.xml</file>
         <file>editor_styles/nppmaterial.xml</file>
         <file>editor_styles/npptwilight.xml</file>
+        <file>images/scintilla_logo.png</file>
     </qresource>
 </RCC>

@@ -50,6 +50,75 @@ RestMdiChild::~RestMdiChild()
 {
     delete m_pFormatThread;
 }
+
+/**
+ * @brief RestMdiChild::buildMultiPartFormData
+ * @param mpData
+ */
+void RestMdiChild::buildMultiPartFormData(QHttpMultiPart &mpData)
+{
+    KeyValList list = m_pRequestOptions->getBodyFormDataList();
+    QHttpPart textPart;
+
+    for (int i=0; i < list.length(); i++) {
+        textPart.setHeader(QNetworkRequest::ContentDispositionHeader, QString("form-data; name=\"%1\"").arg(list[i].key));
+        textPart.setBody(list[i].value.toUtf8());
+        mpData.append(textPart);
+    }
+
+}
+
+/**
+ * @brief RestMdiChild::prepareBody
+ * @param headers
+ */
+void RestMdiChild::prepareBody(QHttpHeaders &headers)
+{
+    switch (m_pRequestOptions->getBodyType()) {
+        case RAW_BODY_TYPE:
+            m_data = m_pRequestOptions->getBodyString().toUtf8();
+            if (m_data.length() > 0) {
+                headers.append(QHttpHeaders::WellKnownHeader::ContentType, m_pRequestOptions->getRawBodyContentType());
+                headers.append(QHttpHeaders::WellKnownHeader::ContentLength, QString::number(m_data.length()));
+            }
+            break;
+
+        case FORM_DATA_BODY_TYPE:
+            buildMultiPartFormData(m_mpData);
+            headers.append(QHttpHeaders::WellKnownHeader::ContentType, QString("multipart/form-data; boundary=%1").arg(m_mpData.boundary()));
+            break;
+    }
+
+}
+
+/**
+ * @brief RestMdiChild::HandleReply
+ * @param pReply
+ */
+void RestMdiChild::HandleReply(QRestReply *pReply)
+{
+    MainWindow *pMain = MainWindow::getInstance();
+    qint64 execTime = QDateTime::currentMSecsSinceEpoch() - m_startTime;
+    QByteArray data = pReply->readBody();
+    QHttpHeaders headers = pReply->networkReply()->headers();
+    QString contentType = headers.value(QHttpHeaders::WellKnownHeader::ContentType).toByteArray();
+    m_pResponse->setHeaders(headers);
+
+    if (data.length() > 0 || pReply->hasError()) {
+        if (data.length() == 0) { data = pReply->errorString().toUtf8(); }
+        m_pResponse->setStatus(pReply->httpStatus());
+        m_pResponse->setExecTime(execTime);
+        m_pResponse->setSize(data.length());
+        QString sText = data;
+        //m_pResponse->setDataWithHeaders(sText, contentType);
+        m_pFormatThread->format(data,contentType);
+    } else {
+        m_pRequestHeader->toggleEnableSendButton();
+    }
+
+    pMain->toggleProgressBar();
+}
+
 /**
  * @brief RestMdiChild::sendRequest
  */
@@ -63,37 +132,31 @@ void RestMdiChild::sendRequest()
         QUrl url(sUrl);
         QNetworkRequest req(url);
         QHttpHeaders headers = m_pRequestOptions->getHeaders();
-        QByteArray data = m_pRequestOptions->getBodyString().toUtf8();
-        if (data.length() > 0) {
-            headers.append(QHttpHeaders::WellKnownHeader::ContentType,"application/json");
-            headers.append(QHttpHeaders::WellKnownHeader::ContentLength, QString::number(data.length()));
-        }
+        QHttpMultiPart mpData(QHttpMultiPart::FormDataType);
+        prepareBody(headers);
+
         req.setHeaders(headers);
 
         m_startTime = QDateTime::currentMSecsSinceEpoch();
         m_pRequestHeader->toggleEnableSendButton();
-        m_pRestMan->sendCustomRequest(req, method.toUtf8(),  data,  this, [this](QRestReply &reply) {
-            MainWindow *pMain = MainWindow::getInstance();
-            qint64 execTime = QDateTime::currentMSecsSinceEpoch() - m_startTime;
-            QByteArray data = reply.readBody();
-            QHttpHeaders headers = reply.networkReply()->headers();
-            QString contentType = headers.value(QHttpHeaders::WellKnownHeader::ContentType).toByteArray();
-            m_pResponse->setHeaders(headers);
-
-            if (data.length() > 0 || reply.hasError()) {
-                if (data.length() == 0) { data = reply.errorString().toUtf8(); }
-                m_pResponse->setStatus(reply.httpStatus());
-                m_pResponse->setExecTime(execTime);
-                m_pResponse->setSize(data.length());
-                QString sText = data;
-                //m_pResponse->setDataWithHeaders(sText, contentType);
-                m_pFormatThread->format(data,contentType);
-            } else {
-                m_pRequestHeader->toggleEnableSendButton();
-            }
-
-            pMain->toggleProgressBar();
-        });
+        QString log = QString("method:%1 url:%2").arg(method,sUrl);
+        pMain->logToConsole(log);
+        log = "request headers:";
+        QList<std::pair<QByteArray, QByteArray>> headerList = headers.toListOfPairs();
+        for (int i=0; i < headerList.length(); i++) {
+            log += headerList[i].first + ": " + headerList[i].second + "\n";
+        }
+        pMain->logToConsole(log);
+        if (method.indexOf(QRegularExpression("POST|PUT|PATCH")) == 0 && m_pRequestOptions->getBodyType() == FORM_DATA_BODY_TYPE) {
+            m_pRestMan->sendCustomRequest(req, method.toUtf8(),  &m_mpData,  this, [this](QRestReply &reply) {
+                m_mpData.setParent((QObject*)(&reply));
+                HandleReply(&reply);
+            });
+        } else {
+            m_pRestMan->sendCustomRequest(req, method.toUtf8(),  m_data,  this, [this](QRestReply &reply) {
+                HandleReply(&reply);
+            });
+        }
 
     } else {
         QMessageBox msgBox;
@@ -102,6 +165,11 @@ void RestMdiChild::sendRequest()
     }
 }
 
+/**
+ * @brief RestMdiChild::formatFinished
+ * @param formattedText
+ * @param contentType
+ */
 void RestMdiChild::formatFinished(QString *formattedText, QString *contentType)
 {
     m_pResponse->setDataWithHeaders(*formattedText, *contentType);
@@ -141,7 +209,7 @@ RequestHeader::RequestHeader(QWidget *parent)
  */
 QString RequestHeader::getURL()
 {
-    return m_pUrlEdit->text();
+    return m_pUrlEdit->text().trimmed();
 }
 
 /**
@@ -153,6 +221,9 @@ QString RequestHeader::getMethod()
     return m_pMethodCB->currentText();
 }
 
+/**
+ * @brief RequestHeader::toggleEnableSendButton
+ */
 void RequestHeader::toggleEnableSendButton()
 {
     m_pSendBtn->setDisabled(m_pSendBtn->isEnabled());

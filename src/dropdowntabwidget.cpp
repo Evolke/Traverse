@@ -31,3 +31,13 @@ int DropDownTabWidget::currentIndex()
 {
     return m_pTabs->currentIndex();
 }
+
+QWidget *DropDownTabWidget::currentTab()
+{
+    return m_pTabs->currentWidget();
+}
+
+QWidget *DropDownTabWidget::getTab(int index)
+{
+    return m_pTabs->widget(index);
+}

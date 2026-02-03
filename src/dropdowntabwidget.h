@@ -13,6 +13,9 @@ public:
 
     int addTab(QWidget *page, const QString &label);
     int currentIndex();
+    QWidget *currentTab();
+    QWidget *getTab(int index);
+
 
 public slots:
     void switchActiveTab(int index);

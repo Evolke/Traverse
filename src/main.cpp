@@ -1,5 +1,5 @@
 #include "mainwindow.h"
-#include "trv_version.h"
+#include "trv_defines.h"
 
 #include <QApplication>
 #include <QLocale>

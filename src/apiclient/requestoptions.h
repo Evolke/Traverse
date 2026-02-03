@@ -2,6 +2,7 @@
 #define REQUESTOPTIONS_H
 
 #include <QWidget>
+#include "../trv_defines.h"
 
 class QTabWidget;
 class QTableWidget;
@@ -11,6 +12,23 @@ class QHttpHeaders;
 class KeyValTableView;
 class DropDownTabWidget;
 
+enum RequestOptionTabs {
+    AUTH_REQUEST_OPTION=0,
+    BODY_REQUEST_OPTION=1,
+    HEADERS_REQUEST_OPTION=2,
+    PARAMS_REQUEST_OPTION=3
+};
+
+enum BodyTypes {
+    NONE_BODY_TYPE=0,
+    RAW_BODY_TYPE=1,
+    FORM_DATA_BODY_TYPE=2
+};
+
+enum RawTypes {
+    JSON_RAW_TYPE=0,
+    XML_RAW_TYPE=1
+};
 
 class RequestOptionTab : public QWidget
 {
@@ -48,17 +66,35 @@ public:
 private:
 };
 
+class RawBodyTab: public QWidget
+{
+    Q_OBJECT
+public:
+    explicit RawBodyTab(QWidget *parent = nullptr);
+
+    TrvScintillaEdit *getEditor() { return m_pBodyEditor; }
+    int getRawBodyType();
+
+public slots:
+    void onRawTypeChanged(int index);
+
+private:
+    TrvScintillaEdit *m_pBodyEditor;
+    QComboBox *m_pRawTypeCombo;
+};
+
 class BodyTab: public RequestOptionTab
 {
     Q_OBJECT
 public:
     explicit BodyTab(QWidget *parent = nullptr);
 
-    TrvScintillaEdit *getEditor() { return m_pBodyEditor; }
+    TrvScintillaEdit *getEditor();
     int getBodyType();
+    int getRawBodyType();
+    KeyValList getFormDataList();
 
 private:
-    TrvScintillaEdit *m_pBodyEditor;
 };
 
 class RequestOptions : public QWidget
@@ -70,6 +106,8 @@ public:
     QHttpHeaders getHeaders();
     int getBodyType();
     QString getBodyString();
+    QString getRawBodyContentType();
+    KeyValList getBodyFormDataList();
 
 signals:
 
