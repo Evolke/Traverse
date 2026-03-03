@@ -83,3 +83,4 @@ CMakeLists.txt.user*
 .qtc_clangd/
 debug/
 release/
+third_party/scintilla/qt/ScintillaEdit/build/
