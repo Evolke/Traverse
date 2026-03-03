@@ -87,14 +87,14 @@ DEFINES += "VERSION_MAJOR=$$VERSION_MAJOR"\
 #Target version
 VERSION = $${VERSION_MAJOR}.$${VERSION_MINOR}.$${VERSION_BUILD}
 
-unix|win32: LIBS += -L$$PWD/scintilla/qt/ScintillaEdit/bin/ -lScintillaEdit5
-unix|win32: LIBS += -L$$PWD/lexilla/src/build/bin/ -lLexilla5
+unix|win32: LIBS += -L$$PWD/third_party/scintilla/qt/ScintillaEdit/bin/ -lScintillaEdit5
+unix|win32: LIBS += -L$$PWD/third_party/lexilla/src/build/bin/ -lLexilla5
 
-INCLUDEPATH += $$PWD/scintilla/include
-INCLUDEPATH += $$PWD/scintilla/src
-INCLUDEPATH += $$PWD/scintilla/qt/ScintillaEdit
-INCLUDEPATH += $$PWD/scintilla/qt/ScintillaEditBase
-INCLUDEPATH += $$PWD/lexilla/
-DEPENDPATH += $$PWD/scintilla/include
+INCLUDEPATH += $$PWD/third_party/scintilla/include
+INCLUDEPATH += $$PWD/third_party/scintilla/src
+INCLUDEPATH += $$PWD/third_party/scintilla/qt/ScintillaEdit
+INCLUDEPATH += $$PWD/third_party/scintilla/qt/ScintillaEditBase
+INCLUDEPATH += $$PWD/third_party/lexilla/
+DEPENDPATH += $$PWD/third_party/scintilla/include
 
 

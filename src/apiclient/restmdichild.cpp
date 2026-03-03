@@ -131,9 +131,13 @@ void RestMdiChild::sendRequest()
         QString method = m_pRequestHeader->getMethod();
         QUrl url(sUrl);
         QNetworkRequest req(url);
-        QHttpHeaders headers = m_pRequestOptions->getHeaders();
-        QHttpMultiPart mpData(QHttpMultiPart::FormDataType);
+        QHttpHeaders headers;
         prepareBody(headers);
+        QHttpHeaders headerOptions = m_pRequestOptions->getHeaders();
+        for (int x=0; x < headerOptions.size(); x++) {
+            headers.append(headerOptions.nameAt(x), headerOptions.valueAt(x));
+        }
+        QHttpMultiPart mpData(QHttpMultiPart::FormDataType);
 
         req.setHeaders(headers);
 

@@ -206,7 +206,7 @@ QComboBox::down-arrow:on {
 QComboBox QAbstractItemView {
     selection-color: #eee;
     selection-background-color: #222;
-    border-radius: none;
+    /*border-radius: none;*/
 }
 
 ToolbarCombo {
@@ -265,7 +265,7 @@ QSpinBox::down-arrow {
 
 QGroupBox {
     border: 1px solid #555;
-    border-radius: 8px;
+    /*border-radius: 8px;*/
 }
 
 QSplitter {
@@ -386,6 +386,10 @@ QToolButton::menu-arrow, QToolButton::menu-indicator {
     image: url(:/images/light_down_arrow.png);
     subcontrol-origin: padding;
     subcontrol-position: bottom right;
+}
+
+QToolButton::right-arrow {
+    image: url(:/images/light_right_arrow.png);
 }
 
 QStatusBar {

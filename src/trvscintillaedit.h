@@ -55,7 +55,7 @@ private:
     void styleSetBack(sptr_t style, sptr_t back);
     void setSelFore(bool useSetting, sptr_t fore);
     void setSelBack(bool useSetting, sptr_t back);
-
+    sptr_t allocateSubStyles(sptr_t styleBase, sptr_t numberStyles);
     void styleClearAll();
     void styleSetFont(sptr_t style, const char * fontName);
     void styleSetSize(sptr_t style, sptr_t sizePoints);
@@ -81,6 +81,7 @@ private:
     void setIdleStyling(sptr_t idleStyling);
     void setFoldFlags(sptr_t flags);
     void setKeyWords(sptr_t keyWordSet, const char * keyWords);
+    void setIdentifiers(sptr_t style, const char * identifiers);
     void indicSetStyle(sptr_t indicator, sptr_t indicatorStyle);
     void indicSetFore(sptr_t indicator, sptr_t fore);
     void setILexer(sptr_t ilexer);

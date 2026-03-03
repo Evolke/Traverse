@@ -69,6 +69,8 @@ void AboutDialog::paintEvent(QPaintEvent *event)
     QPainter p(this);
     //p.setRenderHint(QPainter::Antialiasing,true);
     //p.setRenderHint(QPainter::TextAntialiasing,true);
+    QString fontName = "Arial";
+
     QColor ltTxtClr(180,180,180);
     QRectF frame(QPointF(0,0), geometry().size());
     qreal w = m_logo->width();
@@ -80,7 +82,7 @@ void AboutDialog::paintEvent(QPaintEvent *event)
     linearGradient.setColorAt(1.0, QColor::fromHsl(m_hue,100,20));
     //p.setBrush(linearGradient);
     p.fillRect(0, 0, width(), height(), linearGradient);
-    QFont f("Helvetica", 28, QFont::Bold);
+    QFont f(fontName, 28, QFont::Bold);
     p.setFont(f);
     p.setPen(QColor(0, 0, 0));
     p.setOpacity(1);
@@ -90,7 +92,7 @@ void AboutDialog::paintEvent(QPaintEvent *event)
  #else
     int size = 13;
  #endif
-    p.setFont(QFont("Helvetica", size));
+    p.setFont(QFont(fontName, size));
 
     p.setPen(ltTxtClr);
     QString vers;
